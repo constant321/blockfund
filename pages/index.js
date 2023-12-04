@@ -1,3 +1,5 @@
+import { getmiles } from '../services';
+
 import Head from "next/head";
 import { useEffect, useState } from "react";
 import NextLink from "next/link";
@@ -88,6 +90,26 @@ function CampaignCard({
 
   const { namecamp } = query;
   console.log("Name>>>", namecamp);
+  useEffect (()=>{
+    const getdet = async () => {
+      try {
+        const res = await getmiles();
+        console.log("Resss",res)
+    
+        if (res.success) {
+          console.log("Success");
+        } else {
+          console.log("Fail");
+        }
+      } catch (error) {
+        console.error("Error sending miles:", error);
+      }
+    };
+    
+    // Assuming bid and dist are available in the current scope
+    getdet();
+
+  },[])
 
   return (
     <NextLink href={`/campaign/${id}`}>

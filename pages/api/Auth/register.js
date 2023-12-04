@@ -1,5 +1,6 @@
-import DBconnection from "@/utils/DBConnection";
-import User from "@/model/User";
+import DBconnection  from '../../../utils/DBConnection';
+import User  from '../../../model/User';
+
 import Joi from "joi";
 import bcrypt from "bcrypt";
 
@@ -16,6 +17,7 @@ export default async (req, res) => {
     await DBconnection();
 
     const { name, email, password } = req.body;
+    console.log("1111111111sername",name)
 
     const { error } = schema.validate({ name, email, password });
 
@@ -26,8 +28,12 @@ export default async (req, res) => {
     }
 
     try {
+        console.log("222222",name)
+
 
         const findUser = await User.findOne({ email });
+        console.log("3333333",findUser)
+
 
         if (findUser) {
             return res.status(401).json({ success: false, message: "Email already exists , Please Login" })
@@ -39,6 +45,7 @@ export default async (req, res) => {
 
 
         const user = await User.create({ name, email, password : hashPassword });
+        console.log("User>>>>",user)
 
         if (user) {
             return res.status(200).json({ success: true, message: "Account created successfully" })

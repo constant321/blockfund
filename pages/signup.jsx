@@ -1,3 +1,5 @@
+import { register_user } from '../services';
+
 import {
   Flex,
   Heading,
@@ -15,10 +17,30 @@ import {
   InputRightElement,
 } from "@chakra-ui/react";
 import { useState } from "react";
+import Router from 'next/router';
+
 
 const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [formData, setFormData] = useState({ name: "", email: "", password: "" });
+
+
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        console.log(formData)
+        const res = await register_user(formData);
+        if (res.success) {
+          setTimeout(() => {
+            Router.push("/");
+          }, 1000);
+            console.log("Successs");
+        }
+        else {
+            console.log("Fail");
+        }
+    };
 
   const handleShowClick = () => setShowPassword(!showPassword);
   return (
@@ -39,7 +61,7 @@ const SignUp = () => {
         <Avatar bg="teal.500" />
         <Heading color="teal.400">Sign Up</Heading>
         <Box minW={{ base: "90%", md: "468px" }}>
-          <form action="/">
+          <form action="#" onSubmit={handleSubmit}>
             <Stack
               spacing={4}
               p="1rem"
@@ -49,7 +71,13 @@ const SignUp = () => {
               <FormControl>
                 <InputGroup>
                   <InputLeftElement pointerEvents="none" />
-                  <Input type="email" placeholder="email address" />
+                  <Input onChange={(e) => setFormData({ ...formData, name: e.target.value })} type="name" name="name" id="name" />
+                </InputGroup>
+              </FormControl>
+              <FormControl>
+                <InputGroup>
+                  <InputLeftElement pointerEvents="none" />
+                  <Input onChange={(e) => setFormData({ ...formData, email: e.target.value })} type="email" name="email" id="email" />
                 </InputGroup>
               </FormControl>
               <FormControl>
@@ -58,6 +86,7 @@ const SignUp = () => {
                   <Input
                     type={showPassword ? "text" : "password"}
                     placeholder="Password"
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })} name="password" id="password"  
                   />
                   <InputRightElement width="4.5rem">
                     <Button h="1.75rem" size="sm" onClick={handleShowClick}>
@@ -66,20 +95,7 @@ const SignUp = () => {
                   </InputRightElement>
                 </InputGroup>
               </FormControl>
-              <FormControl>
-                <InputGroup>
-                  <InputLeftElement pointerEvents="none" color="gray.300" />
-                  <Input
-                    type={showConfirmPassword ? "text" : "password"}
-                    placeholder="Confirm Password"
-                  />
-                  <InputRightElement width="4.5rem">
-                    <Button h="1.75rem" size="sm" onClick={handleShowClick}>
-                      {showConfirmPassword ? "Hide" : "Show"}
-                    </Button>
-                  </InputRightElement>
-                </InputGroup>
-              </FormControl>
+             
               <Button
                 borderRadius={0}
                 type="submit"

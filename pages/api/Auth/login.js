@@ -1,5 +1,5 @@
-import DBconnection from "@/utils/DBConnection";
-import User from "@/model/User";
+import DBconnection  from '../../../utils/DBConnection';
+import User  from '../../../model/User';
 import Joi from "joi";
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
@@ -17,6 +17,8 @@ export default async (req, res) => {
     await DBconnection();
 
     const { email, password } = req.body;
+    console.log("1111111111sername",email)
+
 
     const { error } = schema.validate({ email, password });
 
@@ -29,6 +31,8 @@ export default async (req, res) => {
     try {
 
         const user = await User.findOne({ email });
+        console.log("1111111111sername",user)
+
         if (!user) {
             return res.status(401).json({ success: false, message: "Account not Found , PLease Sign Up" })
         }

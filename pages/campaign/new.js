@@ -1,3 +1,5 @@
+import { regmiles } from '../../services';
+
 import React, { useState } from "react";
 import Head from "next/head";
 import { create as ipfsHttpClient } from "ipfs-http-client";
@@ -34,6 +36,7 @@ import web3 from "../../smart-contract/web3";
 const projectId = "2WU8FdtJy1MOIaSmUOReJweAdm7";
 const projectSecretKey = "834da979956df31124cfe3758333a6b4";
 const authorization = "Basic " + btoa(projectId + ":" + projectSecretKey);
+import Router from 'next/router';
 
 export default function NewCampaign() {
   //ipfs
@@ -111,7 +114,7 @@ export default function NewCampaign() {
     );
     try {
       const accounts = await web3.eth.getAccounts();
-      await factory.methods
+      const camp = await factory.methods
         .createCampaign(
           web3.utils.toWei(data.minimumContribution, "ether"),
           data.campaignName,
@@ -122,9 +125,31 @@ export default function NewCampaign() {
         .send({
           from: accounts[0],
         });
-
+      console.log("Campaign id>>", camp.from)
+      const val = camp.from;
       const miles = data.milestones;
       const namecamp = data.campaignName;
+      console.log("Miles",miles)
+      const sendmiles = async () => {
+        try {
+          console.log("Sending miles...", val, miles);
+          const res = await regmiles(val, miles);
+      
+          if (res.success) {
+            setTimeout(() => {
+              Router.push("/");
+            }, 1000);
+            console.log("Success");
+          } else {
+            console.log("Fail");
+          }
+        } catch (error) {
+          console.error("Error sending miles:", error);
+        }
+      };
+      
+      // Assuming bid and dist are available in the current scope
+      sendmiles();
 
       // router.push("/");
 
