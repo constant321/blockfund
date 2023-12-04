@@ -15,7 +15,6 @@ const theme = extendTheme({
 function MyApp({ Component, pageProps }) {
   return (
     <>
-      {" "}
       <ChakraProvider theme={theme}>
         <UseWalletProvider
           chainId={11155111}
@@ -28,7 +27,7 @@ function MyApp({ Component, pageProps }) {
         >
           <NavBar />
           <Component {...pageProps} />
-          <Footer />{" "}
+          <Footer />
         </UseWalletProvider>
       </ChakraProvider>
     </>
