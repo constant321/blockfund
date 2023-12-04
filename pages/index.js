@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import NextLink from "next/link";
 import styles from "../styles/Home.module.css";
 import { getETHPrice, getWEIPriceInUSD } from "../lib/getETHPrice";
-import { useRouter } from 'next/router';
+import { useRouter } from "next/router";
 
 import {
   Alert,
@@ -42,10 +42,8 @@ import { FcShare, FcDonate, FcMoneyTransfer } from "react-icons/fc";
 
 export async function getServerSideProps(context) {
   const campaigns = await factory.methods.getDeployedCampaigns().call();
-  
 
-
-  console.log(">>>>>>>>>>>>>>>",campaigns);
+  console.log(">>>>>>>>>>>>>>>", campaigns);
 
   return {
     props: { campaigns },
@@ -82,7 +80,7 @@ function CampaignCard({
   balance,
   target,
   ethPrice,
-  milestones
+  milestones,
 }) {
   const router = useRouter();
 
@@ -90,7 +88,7 @@ function CampaignCard({
 
   const { namecamp } = query;
   console.log("Name>>>", namecamp);
-  
+
   return (
     <NextLink href={`/campaign/${id}`}>
       <Box
@@ -207,15 +205,14 @@ function CampaignCard({
                 max={web3.utils.fromWei(target, "ether")}
                 mt="2"
               />
-               {milestones && milestones.length > 0 && name == namecamp && (
-        <Box mt="2">
-          <Heading as="h3" fontSize="md" mb="1">
-            Milestones
-          </Heading>
-          <p>{milestones}</p>
-        </Box>
-      )}
-            
+              {milestones && milestones.length > 0 && name == namecamp && (
+                <Box mt="2">
+                  <Heading as="h3" fontSize="md" mb="1">
+                    Milestones
+                  </Heading>
+                  <p>{milestones}</p>
+                </Box>
+              )}
             </Box>{" "}
           </Flex>
         </Box>
@@ -225,7 +222,6 @@ function CampaignCard({
 }
 
 export default function Home({ campaigns }) {
-
   const [campaignList, setCampaignList] = useState([]);
   const [ethPrice, updateEthPrice] = useState(null);
   const wallet = useWallet();
@@ -235,45 +231,47 @@ export default function Home({ campaigns }) {
   const { miles } = query;
   console.log("Milestones>>>", miles);
 
-
   async function getSummary() {
     try {
       const accounts = await web3.eth.getAccounts();
-  
+
       // Ensure there is at least one connected account
       const connectedAccount = accounts.length > 0 ? accounts[0] : null;
-      console.log(">>>>>>>>>>>",connectedAccount);
-      console.log("Campaigns",campaigns)
+      console.log(">>>>>>>>>>>", connectedAccount);
+      console.log("Campaigns", campaigns);
       const summary = await Promise.all(
         campaigns.map(async (campaignId, i) => {
           const campaignContract = Campaign(campaignId);
-          const campaignSummary = await campaignContract.methods.getSummary().call();
-          
-          const isOwner = connectedAccount ? campaignSummary[4].toLowerCase() === connectedAccount.toLowerCase() : false;
-  
+          const campaignSummary = await campaignContract.methods
+            .getSummary()
+            .call();
+
+          const isOwner = connectedAccount
+            ? campaignSummary[4].toLowerCase() ===
+              connectedAccount.toLowerCase()
+            : false;
+
           return {
             ...campaignSummary,
             isOwner,
           };
         })
       );
-  
+
       const ETHPrice = await getETHPrice();
       updateEthPrice(ETHPrice);
       console.log("summary ", summary);
       setCampaignList(summary);
-  
+
       return summary;
     } catch (e) {
       console.log(e);
     }
   }
-  
 
   useEffect(() => {
     getSummary();
   }, [wallet.status]);
-  
 
   return (
     <div>
@@ -337,7 +335,6 @@ export default function Home({ campaigns }) {
                       balance={el[1]}
                       ethPrice={ethPrice}
                       milestones={miles}
-
                     />
                   </div>
                 );
@@ -365,44 +362,46 @@ export default function Home({ campaigns }) {
           {wallet.status !== "connected" ? (
             <Alert status="warning" mt="2">
               <AlertIcon />
-              <AlertDescription mr={2}> Please connect your account to view owner campaigns.</AlertDescription>
+              <AlertDescription mr={2}>
+                {" "}
+                Please connect your account to view owner campaigns.
+              </AlertDescription>
             </Alert>
+          ) : campaignList.filter((el, i) => el.isOwner).length === 0 ? (
+            <Alert status="info" mt="2">
+              <AlertIcon />
+              <AlertDescription mr={2}>
+                {" "}
+                No campaigns are currently available for your account.
+              </AlertDescription>
+            </Alert>
+          ) : campaignList.length > 0 ? (
+            <SimpleGrid columns={{ base: 1, md: 3 }} spacing={10} py={8}>
+              {campaignList.map((el, i) => {
+                if (el.isOwner) {
+                  return (
+                    <div key={i}>
+                      <CampaignCard
+                        name={el[5]}
+                        description={el[6]}
+                        creatorId={el[4]}
+                        imageURL={el[7]}
+                        id={campaigns[i]}
+                        target={el[8]}
+                        balance={el[1]}
+                        ethPrice={ethPrice}
+                      />
+                    </div>
+                  );
+                }
+              })}
+            </SimpleGrid>
           ) : (
-            campaignList.filter((el, i) => el.isOwner).length === 0 ? (
-              <Alert status="info" mt="2">
-                <AlertIcon />
-                <AlertDescription mr={2}> No campaigns are currently available for your account.</AlertDescription>
-              </Alert>
-            ) : (
-              campaignList.length > 0 ? (
-                <SimpleGrid columns={{ base: 1, md: 3 }} spacing={10} py={8}>
-                  {campaignList.map((el, i) => {
-                    if (el.isOwner) {
-                      return (
-                        <div key={i}>
-                          <CampaignCard
-                            name={el[5]}
-                            description={el[6]}
-                            creatorId={el[4]}
-                            imageURL={el[7]}
-                            id={campaigns[i]}
-                            target={el[8]}
-                            balance={el[1]}
-                            ethPrice={ethPrice}
-                          />
-                        </div>
-                      );
-                    }
-                  })}
-                </SimpleGrid>
-              ) : (
-                <SimpleGrid columns={{ base: 1, md: 3 }} spacing={10} py={8}>
-                  <Skeleton height="25rem" />
-                  <Skeleton height="25rem" />
-                  <Skeleton height="25rem" />
-                </SimpleGrid>
-              )
-            )
+            <SimpleGrid columns={{ base: 1, md: 3 }} spacing={10} py={8}>
+              <Skeleton height="25rem" />
+              <Skeleton height="25rem" />
+              <Skeleton height="25rem" />
+            </SimpleGrid>
           )}
         </Container>
 

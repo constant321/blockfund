@@ -36,15 +36,14 @@ const projectSecretKey = "834da979956df31124cfe3758333a6b4";
 const authorization = "Basic " + btoa(projectId + ":" + projectSecretKey);
 
 export default function NewCampaign() {
-//ipfs
-
+  //ipfs
 
   const [buf, setBuf] = useState();
   const [hash, setHash] = useState("");
   const [loader, setLoader] = useState(false);
   const [showLinks, setShowLinks] = useState(false);
 
-  const [images, setImages] = useState([])
+  const [images, setImages] = useState([]);
   const ipfs = ipfsHttpClient({
     url: "https://ipfs.infura.io:5001/api/v0",
     headers: {
@@ -53,21 +52,21 @@ export default function NewCampaign() {
   });
   const onSubmitHandler = async () => {
     const input = document.getElementById("file");
-    console.log(">>>>>>>",input)
-  
+    console.log(">>>>>>>", input);
+
     if (!input.files || input.files.length === 0) {
       return alert("No files selected");
     }
-  
+
     const file = input.files[0];
     setLoader(true);
-  
+
     try {
       const result = await ipfs.add(file);
       const ipfsId = result.path;
       console.log("Generated IPFS Hash:", ipfsId);
-      const val = ("https://ipfs.io/ipfs/"+ipfsId);
-      console.log("Value",val);
+      const val = "https://ipfs.io/ipfs/" + ipfsId;
+      console.log("Value", val);
       setLink(val);
       setHash(ipfsId);
       setShowLinks(true);
@@ -78,16 +77,6 @@ export default function NewCampaign() {
       setLoader(false);
     }
   };
-
-
-
-
-
-
-
-
-
-
 
   const {
     handleSubmit,
@@ -134,14 +123,14 @@ export default function NewCampaign() {
           from: accounts[0],
         });
 
-        const miles = data.milestones
-        const namecamp = data.campaignName
+      const miles = data.milestones;
+      const namecamp = data.campaignName;
 
       // router.push("/");
 
       router.push({
-        pathname: '/', // Specify the path of your next page
-        query: { 
+        pathname: "/", // Specify the path of your next page
+        query: {
           miles,
           namecamp,
         },
@@ -217,7 +206,7 @@ export default function NewCampaign() {
                     {...register("imageUrl", { required: true })}
                     isDisabled={isSubmitting}
                     type="url"
-                    value = {Link}
+                    value={Link}
                   />
                 </FormControl>
                 <FormControl id="target">
@@ -255,19 +244,18 @@ export default function NewCampaign() {
                     <InputRightAddon children="Milestones" />
                   </InputGroup>
                 </FormControl>
-                
 
                 <div>
-  {ipfs && (
-   <>
-   <h3>Upload Property Docs to IPFS</h3>
-   <input type="file" name="file" id="file" />
-   <button type="button" onClick={onSubmitHandler}>
-     Upload file
-   </button>
- </>
-  )}
-  {/* {showLinks ? (
+                  {ipfs && (
+                    <>
+                      <h3>Upload Property Docs to IPFS</h3>
+                      <input type="file" name="file" id="file" />
+                      <button type="button" onClick={onSubmitHandler}>
+                        Upload file
+                      </button>
+                    </>
+                  )}
+                  {/* {showLinks ? (
     <div>
       <h6>https://ipfs.io/ipfs/{hash}</h6>
       <a href={"https://ipfs.io/ipfs/" + hash}>Clickable Link to view file on IPFS</a>
@@ -275,10 +263,7 @@ export default function NewCampaign() {
   ) : (
     <p></p>
   )} */}
-</div>
-
-
-
+                </div>
 
                 {error ? (
                   <Alert status="error">

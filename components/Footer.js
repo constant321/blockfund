@@ -11,6 +11,7 @@ import {
   useBreakpointValue,
 } from "@chakra-ui/react";
 import NextLink from "next/link";
+import { useRouter } from "next/router";
 
 const SocialButton = ({ children, label, href }) => {
   return (
@@ -39,6 +40,10 @@ const SocialButton = ({ children, label, href }) => {
 };
 
 export default function Footer() {
+  const router = useRouter();
+  if (router.pathname === "/login" || router.pathname === "/signup") {
+    return null;
+  }
   return (
     <Box
       bg={useColorModeValue("gray.50", "gray.900")}
@@ -80,12 +85,7 @@ export default function Footer() {
         </Heading>
         <Stack direction={"row"} spacing={6}>
           <NextLink href="/">Home</NextLink>
-          <Link
-            href={
-              ""
-            }
-            isExternal
-          >
+          <Link href={""} isExternal>
             Github
           </Link>
           <Link href={"mailto:"} isExternal>

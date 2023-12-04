@@ -19,10 +19,15 @@ import { useWallet } from "use-wallet";
 import NextLink from "next/link";
 import DarkModeSwitch from "./DarkModeSwitch";
 import { ChevronDownIcon } from "@chakra-ui/icons";
+import { useRouter } from "next/router";
 
 export default function NavBar() {
   const wallet = useWallet();
+  const router = useRouter();
 
+  if (router.pathname === "/login" || router.pathname === "/signup") {
+    return null;
+  }
   return (
     <Box>
       <Flex
