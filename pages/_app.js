@@ -22,7 +22,7 @@ function MyApp({ Component, pageProps }) {
           connectors={{
             walletconnect: {
               rpcUrl:
-                // "PLACE HERE",
+                'https://sepolia.infura.io/v3/08b47ddd11c3416ba917e4797ab0567a'
             },
           }}
         >

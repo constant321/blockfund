@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import NextLink from "next/link";
 import styles from "../styles/Home.module.css";
 import { getETHPrice, getWEIPriceInUSD } from "../lib/getETHPrice";
+import { useRouter } from 'next/router';
+
 import {
   Alert,
   AlertIcon,
@@ -27,6 +29,7 @@ import {
   HStack,
   Stack,
   Progress,
+  List,
 } from "@chakra-ui/react";
 
 import { useWallet } from "use-wallet";
@@ -39,8 +42,10 @@ import { FcShare, FcDonate, FcMoneyTransfer } from "react-icons/fc";
 
 export async function getServerSideProps(context) {
   const campaigns = await factory.methods.getDeployedCampaigns().call();
+  
 
-  console.log(campaigns);
+
+  console.log(">>>>>>>>>>>>>>>",campaigns);
 
   return {
     props: { campaigns },
@@ -77,7 +82,15 @@ function CampaignCard({
   balance,
   target,
   ethPrice,
+  milestones
 }) {
+  const router = useRouter();
+
+  const { query } = router;
+
+  const { namecamp } = query;
+  console.log("Name>>>", namecamp);
+  
   return (
     <NextLink href={`/campaign/${id}`}>
       <Box
@@ -194,6 +207,15 @@ function CampaignCard({
                 max={web3.utils.fromWei(target, "ether")}
                 mt="2"
               />
+               {milestones && milestones.length > 0 && name == namecamp && (
+        <Box mt="2">
+          <Heading as="h3" fontSize="md" mb="1">
+            Milestones
+          </Heading>
+          <p>{milestones}</p>
+        </Box>
+      )}
+            
             </Box>{" "}
           </Flex>
         </Box>
@@ -203,9 +225,15 @@ function CampaignCard({
 }
 
 export default function Home({ campaigns }) {
+
   const [campaignList, setCampaignList] = useState([]);
   const [ethPrice, updateEthPrice] = useState(null);
   const wallet = useWallet();
+  const router = useRouter();
+  const { query } = router;
+
+  const { miles } = query;
+  console.log("Milestones>>>", miles);
 
 
   async function getSummary() {
@@ -214,7 +242,8 @@ export default function Home({ campaigns }) {
   
       // Ensure there is at least one connected account
       const connectedAccount = accounts.length > 0 ? accounts[0] : null;
-      console.log(connectedAccount);
+      console.log(">>>>>>>>>>>",connectedAccount);
+      console.log("Campaigns",campaigns)
       const summary = await Promise.all(
         campaigns.map(async (campaignId, i) => {
           const campaignContract = Campaign(campaignId);
@@ -244,6 +273,7 @@ export default function Home({ campaigns }) {
   useEffect(() => {
     getSummary();
   }, [wallet.status]);
+  
 
   return (
     <div>
@@ -306,6 +336,8 @@ export default function Home({ campaigns }) {
                       target={el[8]}
                       balance={el[1]}
                       ethPrice={ethPrice}
+                      milestones={miles}
+
                     />
                   </div>
                 );

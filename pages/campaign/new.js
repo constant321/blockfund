@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import Head from "next/head";
+import { create as ipfsHttpClient } from "ipfs-http-client";
+
 import { useAsync } from "react-use";
 import { useRouter } from "next/router";
 import { useWallet } from "use-wallet";
@@ -29,8 +31,64 @@ import { getETHPrice, getETHPriceInUSD } from "../../lib/getETHPrice";
 
 import factory from "../../smart-contract/factory";
 import web3 from "../../smart-contract/web3";
+const projectId = "2WU8FdtJy1MOIaSmUOReJweAdm7";
+const projectSecretKey = "834da979956df31124cfe3758333a6b4";
+const authorization = "Basic " + btoa(projectId + ":" + projectSecretKey);
 
 export default function NewCampaign() {
+//ipfs
+
+
+  const [buf, setBuf] = useState();
+  const [hash, setHash] = useState("");
+  const [loader, setLoader] = useState(false);
+  const [showLinks, setShowLinks] = useState(false);
+
+  const [images, setImages] = useState([])
+  const ipfs = ipfsHttpClient({
+    url: "https://ipfs.infura.io:5001/api/v0",
+    headers: {
+      authorization,
+    },
+  });
+  const onSubmitHandler = async () => {
+    const input = document.getElementById("file");
+    console.log(">>>>>>>",input)
+  
+    if (!input.files || input.files.length === 0) {
+      return alert("No files selected");
+    }
+  
+    const file = input.files[0];
+    setLoader(true);
+  
+    try {
+      const result = await ipfs.add(file);
+      const ipfsId = result.path;
+      console.log("Generated IPFS Hash:", ipfsId);
+      const val = ("https://ipfs.io/ipfs/"+ipfsId);
+      console.log("Value",val);
+      setLink(val);
+      setHash(ipfsId);
+      setShowLinks(true);
+    } catch (err) {
+      console.error(err);
+      alert("An error occurred. Please check the console");
+    } finally {
+      setLoader(false);
+    }
+  };
+
+
+
+
+
+
+
+
+
+
+
   const {
     handleSubmit,
     register,
@@ -44,6 +102,7 @@ export default function NewCampaign() {
   const [minContriInUSD, setMinContriInUSD] = useState();
   const [targetInUSD, setTargetInUSD] = useState();
   const [ETHPrice, setETHPrice] = useState(0);
+  const [Link, setLink] = useState("");
   useAsync(async () => {
     try {
       const result = await getETHPrice();
@@ -58,7 +117,8 @@ export default function NewCampaign() {
       data.campaignName,
       data.description,
       data.imageUrl,
-      data.target
+      data.target,
+      data.milestones
     );
     try {
       const accounts = await web3.eth.getAccounts();
@@ -74,7 +134,18 @@ export default function NewCampaign() {
           from: accounts[0],
         });
 
-      router.push("/");
+        const miles = data.milestones
+        const namecamp = data.campaignName
+
+      // router.push("/");
+
+      router.push({
+        pathname: '/', // Specify the path of your next page
+        query: { 
+          miles,
+          namecamp,
+        },
+      });
     } catch (err) {
       setError(err.message);
       console.log(err);
@@ -146,6 +217,7 @@ export default function NewCampaign() {
                     {...register("imageUrl", { required: true })}
                     isDisabled={isSubmitting}
                     type="url"
+                    value = {Link}
                   />
                 </FormControl>
                 <FormControl id="target">
@@ -168,6 +240,45 @@ export default function NewCampaign() {
                     </FormHelperText>
                   ) : null}
                 </FormControl>
+                <FormControl id="milestones">
+                  <FormLabel>Milestones</FormLabel>
+                  <InputGroup>
+                    <Input
+                      type="number"
+                      step="any"
+                      {...register("milestones", { required: true })}
+                      isDisabled={isSubmitting}
+                      // onChange={(e) => {
+                      //   setTargetInUSD(Math.abs(e.target.value));
+                      // }}
+                    />
+                    <InputRightAddon children="Milestones" />
+                  </InputGroup>
+                </FormControl>
+                
+
+                <div>
+  {ipfs && (
+   <>
+   <h3>Upload Property Docs to IPFS</h3>
+   <input type="file" name="file" id="file" />
+   <button type="button" onClick={onSubmitHandler}>
+     Upload file
+   </button>
+ </>
+  )}
+  {/* {showLinks ? (
+    <div>
+      <h6>https://ipfs.io/ipfs/{hash}</h6>
+      <a href={"https://ipfs.io/ipfs/" + hash}>Clickable Link to view file on IPFS</a>
+    </div>
+  ) : (
+    <p></p>
+  )} */}
+</div>
+
+
+
 
                 {error ? (
                   <Alert status="error">
